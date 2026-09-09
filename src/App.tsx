@@ -654,7 +654,7 @@ export default function App() {
               { name: 'Diki', handle: '@_7iiikkyiiss', url: 'https://www.instagram.com/_7iiikkyiiss?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
               { name: 'Danil', handle: '@hajjeddaniel', url: 'https://www.instagram.com/hajjeddaniel?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
               { name: 'Nanda', handle: '@ndarizqi_13', url: 'https://www.instagram.com/ndarizqi_13?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
-              { name: 'Zayyid', handle: '@zayyiddd_', url: 'https://www.instagram.com/zayyiddd_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
+              { name: 'Zayyid', handle: '@hii.jeyyy', url: 'https://www.instagram.com/hii.jeyyy?stkn=OXdpbXp2OXM3NDM=' },
               { name: 'Ozil', handle: '@kozill', url: 'https://www.instagram.com/kozill?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
               { name: 'Ali', handle: '@alikazhim_', url: 'https://www.instagram.com/alikazhim_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
               { name: 'Farid', handle: '@ahmfarid_', url: 'https://www.instagram.com/ahmfarid_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },

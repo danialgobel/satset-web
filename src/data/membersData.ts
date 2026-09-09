@@ -48,7 +48,7 @@ export const squadsData: SquadGroup[] = [
     fullResPhoto: "/assets/dokumentasi_baru/gathering_outdoor_4k.jpg",
     description: "Kawan seperjuangan dari masa kecil hingga saat ini.",
     members: [
-      { name: "Zayyid", handle: "@zayyiddd_", instagram: "https://www.instagram.com/zayyiddd_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+      { name: "Zayyid", handle: "@hii.jeyyy", instagram: "https://www.instagram.com/hii.jeyyy?stkn=OXdpbXp2OXM3NDM=" },
       { name: "Ozil", handle: "@kozill", instagram: "https://www.instagram.com/kozill?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
       { name: "Ali", handle: "@alikazhim_", instagram: "https://www.instagram.com/alikazhim_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
       { name: "Farid", handle: "@ahmfarid_", instagram: "https://www.instagram.com/ahmfarid_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" }

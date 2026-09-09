@@ -42,6 +42,20 @@ export function IntroSplash({ onEnter }: IntroSplashProps) {
     return () => clearTimeout(timeout);
   }, [displayedText, isDeleting]);
 
+  // Preload loading carousel thumbnails while user is on the splash screen
+  useEffect(() => {
+    const thumbs = [
+      '/assets/loading_thumbs/brotherhood_wide_4k.webp',
+      '/assets/loading_thumbs/gathering_outdoor_4k.webp',
+      '/assets/loading_thumbs/circle_gathering_4k.webp',
+      '/assets/loading_thumbs/squad_portrait_02.webp',
+    ];
+    thumbs.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, []);
+
   // Separate asterisk for warm accent styling
   const hasAsterisk = displayedText.endsWith('*');
   const mainPart = hasAsterisk ? displayedText.slice(0, -1) : displayedText;

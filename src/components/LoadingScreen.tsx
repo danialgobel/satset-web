@@ -46,6 +46,14 @@ export function LoadingScreen({ onComplete, isMediaReady }: LoadingScreenProps) 
     return () => clearInterval(interval);
   }, [isMediaReady, onComplete]);
 
+  // Helper to use ultra-fast 20KB loading thumbnails instead of 3.3MB raw files
+  const getThumbUrl = (src: string) => {
+    if (src.includes('/assets/dokumentasi_baru/')) {
+      return src.replace('/assets/dokumentasi_baru/', '/assets/loading_thumbs/');
+    }
+    return src;
+  };
+
   // 3 Photos in view (Left, Center, Right)
   const prevIdx = (currentIndex - 1 + photos.length) % photos.length;
   const currentPhoto = photos[currentIndex];
@@ -85,8 +93,9 @@ export function LoadingScreen({ onComplete, isMediaReady }: LoadingScreenProps) 
             className="absolute w-36 sm:w-56 h-48 sm:h-72 rounded-2xl overflow-hidden shadow-2xl blur-[2.5px] pointer-events-none"
           >
             <img
-              src={photos[prevIdx].src}
+              src={getThumbUrl(photos[prevIdx].src)}
               alt="Archive Preview"
+              loading="eager"
               className="w-full h-full object-cover"
             />
           </motion.div>
@@ -100,8 +109,9 @@ export function LoadingScreen({ onComplete, isMediaReady }: LoadingScreenProps) 
             className="relative z-20 w-48 sm:w-64 h-60 sm:h-80 rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/20"
           >
             <img
-              src={currentPhoto.src}
+              src={getThumbUrl(currentPhoto.src)}
               alt={currentPhoto.caption}
+              loading="eager"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-3.5 sm:p-4">
@@ -120,8 +130,9 @@ export function LoadingScreen({ onComplete, isMediaReady }: LoadingScreenProps) 
             className="absolute w-36 sm:w-56 h-48 sm:h-72 rounded-2xl overflow-hidden shadow-2xl blur-[2.5px] pointer-events-none"
           >
             <img
-              src={photos[nextIdx].src}
+              src={getThumbUrl(photos[nextIdx].src)}
               alt="Archive Preview"
+              loading="eager"
               className="w-full h-full object-cover"
             />
           </motion.div>

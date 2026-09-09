@@ -71,9 +71,9 @@ const galleryData: GalleryCardItem[] = [
 
 const cardVariants: Variants = {
   offscreen: {
-    y: 180,
+    y: 90,
     opacity: 0,
-    scale: 0.94
+    scale: 0.96
   },
   onscreen: {
     y: 0,
@@ -81,8 +81,9 @@ const cardVariants: Variants = {
     scale: 1,
     transition: {
       type: "spring",
-      bounce: 0.35,
-      duration: 0.9
+      damping: 24,
+      stiffness: 180,
+      mass: 0.8
     }
   }
 };
@@ -119,7 +120,7 @@ export function ScrollTriggeredGallery({ onSelectImage }: ScrollTriggeredGallery
                 className="w-full max-w-lg cursor-pointer"
                 initial="offscreen"
                 whileInView="onscreen"
-                viewport={{ once: true, amount: 0.3 }}
+                viewport={{ once: true, amount: 0.2, margin: "0px 0px -40px 0px" }}
                 onClick={() =>
                   onSelectImage({
                     src: item.fullRes,
@@ -129,10 +130,10 @@ export function ScrollTriggeredGallery({ onSelectImage }: ScrollTriggeredGallery
               >
                 <motion.div
                   variants={cardVariants}
-                  whileHover={{ scale: 1.02, y: -6 }}
-                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                   style={{ background: gradientBackground }}
-                  className="rounded-3xl p-5 sm:p-7 border border-white/10 hover:border-[#DEDBC8]/40 shadow-2xl transition-all relative overflow-hidden group"
+                  className="rounded-3xl p-5 sm:p-7 border border-white/10 hover:border-[#DEDBC8]/40 shadow-2xl relative overflow-hidden group transform-gpu will-change-transform"
                 >
                   {/* Top indicator: Index number only (no KOLEKSI BARU text) */}
                   <div className="flex items-center justify-end mb-4">

@@ -9,6 +9,7 @@ import { LightboxModal } from './components/LightboxModal';
 import { VideoModal } from './components/VideoModal';
 import { ScrollTriggeredGallery } from './components/ScrollTriggeredGallery';
 import { IntroSplash } from './components/IntroSplash';
+import { LoadingScreen } from './components/LoadingScreen';
 import { squadsData, allArchivePhotos } from './data/membersData';
 import type { ArchivePhoto } from './data/membersData';
 
@@ -31,7 +32,10 @@ function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
 }
 
 export default function App() {
+  const [isSplashOpen, setIsSplashOpen] = useState(true);
+  const [isLoadingScreenOpen, setIsLoadingScreenOpen] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const [isMediaReady, setIsMediaReady] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ src: string; caption: string; subtext?: string } | null>(null);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [modalVideo, setModalVideo] = useState<{ src?: string; youtubeId?: string }>({
@@ -40,7 +44,7 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'new' | 'classic'>('all');
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Background Music Controller (Steve Lacy - Oh Yeah)
+  // Background Music Controller (Steve Lacy - Oh Yeah, starting from second 10)
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -74,21 +78,44 @@ export default function App() {
     }, 40);
   };
 
-  const handleEnter = () => {
+  const handleSplashEnter = () => {
+    setIsSplashOpen(false);
+    setIsLoadingScreenOpen(true);
+
+    // 1. Prepare and prebuffer in-DOM audio element immediately during user gesture
+    if (audioRef.current) {
+      audioRef.current.volume = 0;
+      audioRef.current.load();
+    }
+
+    // 2. Preload and prime hero video buffer
+    if (heroVideoRef.current) {
+      heroVideoRef.current.load();
+      const checkVideoReady = () => {
+        if (heroVideoRef.current && heroVideoRef.current.readyState >= 3) {
+          setIsMediaReady(true);
+        }
+      };
+      heroVideoRef.current.addEventListener('canplay', checkVideoReady, { once: true });
+      heroVideoRef.current.addEventListener('canplaythrough', () => setIsMediaReady(true), { once: true });
+      if (heroVideoRef.current.readyState >= 3) {
+        setIsMediaReady(true);
+      }
+    }
+  };
+
+  const handleLoadingComplete = () => {
+    setIsLoadingScreenOpen(false);
     setHasEntered(true);
+
+    // 1. Play buttery-smooth 1080p hero video
     if (heroVideoRef.current) {
       heroVideoRef.current.play().catch(() => {});
     }
 
-    // Play background music starting at second 10 with smooth fade-in
-    try {
-      if (!audioRef.current) {
-        const audio = new Audio('/assets/audio/steve_lacy_oh_yeah.mp3');
-        audio.loop = true;
-        audioRef.current = audio;
-      }
+    // 2. Start Steve Lacy background music with silky fade-in
+    if (audioRef.current) {
       const audio = audioRef.current;
-      audio.currentTime = 10;
       audio.volume = 0;
       const playPromise = audio.play();
       if (playPromise !== undefined) {
@@ -101,8 +128,6 @@ export default function App() {
             setIsMusicPlaying(false);
           });
       }
-    } catch {
-      // Browser audio policy
     }
   };
 
@@ -186,9 +211,19 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-[#E1E0CC] selection:bg-[#DEDBC8] selection:text-black">
-      {/* Intro / Splash Screen (Bypass iOS & Android Autoplay restriction) */}
+      {/* Intro / Splash Screen with relaxed typewriter */}
       <AnimatePresence>
-        {!hasEntered && <IntroSplash onEnter={handleEnter} />}
+        {isSplashOpen && <IntroSplash onEnter={handleSplashEnter} />}
+      </AnimatePresence>
+
+      {/* Loading Screen with 3-Photo Carousel & Preload detection */}
+      <AnimatePresence>
+        {isLoadingScreenOpen && (
+          <LoadingScreen
+            onComplete={handleLoadingComplete}
+            isMediaReady={isMediaReady}
+          />
+        )}
       </AnimatePresence>
 
       {/* Hanging Top Navbar */}
@@ -202,16 +237,19 @@ export default function App() {
           {/* Video Dokumentasi Asli Satsetwell (1080p HD, Universal H.264, Autoplay di HP) */}
           <video
             ref={heroVideoRef}
-            src="/assets/dokumentasi_baru/satsetwell_hero_hd.mp4"
             autoPlay
             loop
             muted
             playsInline
+            preload="auto"
             // @ts-ignore
             webkit-playsinline="true"
             poster="/assets/dokumentasi_baru/gathering_outdoor_4k.webp"
             className="absolute inset-0 w-full h-full object-cover"
-          />
+          >
+            <source src="/assets/dokumentasi_baru/satsetwell_hero_mobile.mp4" type="video/mp4" />
+            <source src="/assets/dokumentasi_baru/satsetwell_hero_hd.mp4" type="video/mp4" />
+          </video>
 
           {/* Noise Texture Overlay */}
           <div className="noise-overlay absolute inset-0 opacity-[0.55] mix-blend-overlay pointer-events-none" />
@@ -761,6 +799,14 @@ export default function App() {
           </button>
         </motion.div>
       )}
+
+      {/* Background Audio Element (Native In-DOM Preloaded for iOS & Android) */}
+      <audio
+        ref={audioRef}
+        src="/assets/audio/steve_lacy_from_10s.mp3"
+        preload="auto"
+        loop
+      />
 
       {/* Modals */}
       <LightboxModal

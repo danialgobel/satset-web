@@ -15,27 +15,27 @@ export function IntroSplash({ onEnter }: IntroSplashProps) {
 
     if (!isDeleting) {
       if (displayedText.length < fullText.length) {
-        // Typing characters quickly (75ms)
+        // Typing characters calmly and naturally (160ms)
         timeout = setTimeout(() => {
           setDisplayedText(fullText.slice(0, displayedText.length + 1));
-        }, 75);
+        }, 160);
       } else {
-        // Pause briefly once fully typed (950ms) before deleting
+        // Pause comfortably once fully typed (1800ms) before deleting
         timeout = setTimeout(() => {
           setIsDeleting(true);
-        }, 950);
+        }, 1800);
       }
     } else {
       if (displayedText.length > 0) {
-        // Deleting characters even faster (38ms)
+        // Deleting characters at a gentle pace (65ms)
         timeout = setTimeout(() => {
           setDisplayedText(fullText.slice(0, displayedText.length - 1));
-        }, 38);
+        }, 65);
       } else {
-        // Pause briefly before typing again (300ms)
+        // Pause briefly before typing again (500ms)
         timeout = setTimeout(() => {
           setIsDeleting(false);
-        }, 300);
+        }, 500);
       }
     }
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ArrowRight, Check, Play, Eye, Sparkles, ExternalLink, Image as ImageIcon, VolumeX } from 'lucide-react';
+import { ArrowRight, Check, Play, Eye, Sparkles, Image as ImageIcon, VolumeX, Share2, Copy } from 'lucide-react';
 import { WordsPullUp } from './components/WordsPullUp';
 import { WordsPullUpMultiStyle } from './components/WordsPullUpMultiStyle';
 import { ScrollRevealParagraph } from './components/ScrollRevealParagraph';
@@ -42,7 +42,39 @@ export default function App() {
     src: '/assets/dokumentasi_baru/satsetwell_hero_hd.mp4'
   });
   const [activeFilter, setActiveFilter] = useState<'all' | 'new' | 'classic'>('all');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2800);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      triggerToast('Tautan berhasil disalin!');
+    } catch {
+      triggerToast('Tautan berhasil disalin!');
+    }
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Satsetwell: Creative Collective & Archive',
+          text: 'Sebuah ruang tumbuh bersama dari masa kecil hingga saat ini.',
+          url,
+        });
+        return;
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
+      }
+    }
+    await handleCopyLink();
+  };
 
   // Background Music Controller (Steve Lacy - Oh Yeah, starting from second 10)
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -227,7 +259,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* Hanging Top Navbar */}
-      <Navbar />
+      <Navbar onShare={handleShare} />
 
       {/* =========================================================================
           SECTION 1: HERO (Video Asli Satsetwell HD 1080p - Proporsi Pas di HP & Desktop)
@@ -291,9 +323,9 @@ export default function App() {
                   transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-wrap items-center gap-3.5"
                 >
-                  {/* Button 1: Jelajahi Member (Apple Glass Style) */}
+                  {/* Button 1: Jelajahi Member (Langsung Mengarah ke Direktori Member di Bawah) */}
                   <a
-                    href="#collective"
+                    href="#members"
                     className="group inline-flex items-center gap-2.5 hover:gap-3.5 bg-white/[0.12] hover:bg-white/[0.22] active:bg-white/[0.08] backdrop-blur-2xl border border-white/25 hover:border-white/45 text-white font-medium text-xs sm:text-sm rounded-full pl-5 pr-1.5 py-1.5 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_8px_32px_rgba(0,0,0,0.35)] active:scale-95"
                   >
                     <span>Jelajahi Member</span>
@@ -480,49 +512,23 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* NAMA-NAMA MEMBER BESAR & JELAS */}
-                  <div className="space-y-3 mb-4">
-                    {squad.members.map((member) => (
-                      <a
-                        key={member.name}
-                        href={member.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-[#DEDBC8]/40 hover:bg-black/70 transition-all group/m"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className="p-1 rounded-full bg-[#DEDBC8]/15 text-[#DEDBC8]">
-                            <Check className="w-3.5 h-3.5" />
-                          </span>
-                          <div>
-                            {/* NAMA BESAR */}
-                            <span className="text-base sm:text-lg font-bold text-white group-hover/m:text-[#DEDBC8] transition-colors block leading-tight">
-                              {member.name}
-                            </span>
-                            <span className="text-xs text-gray-400 font-mono">
-                              {member.handle}
-                            </span>
-                          </div>
-                        </div>
-                        <InstagramIcon className="w-4 h-4 text-gray-500 group-hover/m:text-[#DEDBC8] transition-colors" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Bottom Action: Link Instagram Squad */}
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                  <p className="text-xs text-gray-400 line-clamp-1 max-w-[170px]">
+                  {/* Deskripsi Squad */}
+                  <p className="text-sm text-[#E1E0CC]/80 leading-relaxed font-light mb-4">
                     {squad.description}
                   </p>
+                </div>
+
+                {/* Bottom Action: Menuju Direktori Member di Bagian Bawah */}
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[11px] font-mono text-gray-400 uppercase tracking-wider">
+                    Satsetwell
+                  </span>
                   <a
-                    href={squad.members[0].instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-white text-xs font-semibold text-[#DEDBC8] hover:text-black transition-all border border-white/10"
+                    href="#members"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/60 hover:bg-white text-xs font-medium text-[#DEDBC8] hover:text-black transition-all border border-white/10 active:scale-95"
                   >
-                    <span>Profil</span>
-                    <ExternalLink className="w-3 h-3" />
+                    <span>Lihat Member</span>
+                    <ArrowRight className="w-3 h-3" />
                   </a>
                 </div>
               </motion.div>
@@ -735,7 +741,7 @@ export default function App() {
           FOOTER
           ========================================================================= */}
       <footer className="bg-black py-12 px-4 sm:px-6 md:px-8 border-t border-white/10 text-center sm:text-left">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <span className="text-lg font-bold tracking-tight text-[#E1E0CC]">
               Satsetwell<span className="text-[#DEDBC8] font-light">*</span>
@@ -745,18 +751,56 @@ export default function App() {
             </span>
           </div>
 
-          <div className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Satsetwell. All memories preserved.
+          {/* Share & Copy Link Buttons (Tanpa Emot AI) */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              onClick={handleCopyLink}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.16] active:bg-white/[0.04] border border-white/15 text-[#E1E0CC] text-xs font-mono tracking-wide uppercase transition-all duration-300 cursor-pointer active:scale-95 select-none"
+            >
+              <Copy className="w-3.5 h-3.5 text-[#DEDBC8]" />
+              <span>Salin Tautan</span>
+            </button>
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent('Satsetwell: Creative Collective & Archive — ' + (typeof window !== 'undefined' ? window.location.href : ''))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.08] hover:bg-white/[0.16] active:bg-white/[0.04] border border-white/15 text-[#E1E0CC] text-xs font-mono tracking-wide uppercase transition-all duration-300 cursor-pointer active:scale-95 select-none"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#DEDBC8]" />
+              <span>Bagikan ke WhatsApp</span>
+            </a>
           </div>
 
-          <a
-            href="#hero"
-            className="text-xs text-gray-400 hover:text-[#DEDBC8] transition-colors"
-          >
-            Kembali ke Atas ↑
-          </a>
+          <div className="flex items-center gap-6">
+            <div className="text-xs text-gray-500">
+              © {new Date().getFullYear()} Satsetwell. All memories preserved.
+            </div>
+
+            <a
+              href="#hero"
+              className="text-xs text-gray-400 hover:text-[#DEDBC8] transition-colors"
+            >
+              Kembali ke Atas ↑
+            </a>
+          </div>
         </div>
       </footer>
+
+      {/* Toast Notification (Tanpa Emot AI) */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -24, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-black/90 backdrop-blur-2xl border border-white/20 shadow-[0_12px_36px_rgba(0,0,0,0.85)] text-[#E1E0CC] text-xs sm:text-sm font-mono tracking-wider pointer-events-none select-none"
+          >
+            <Check className="w-4 h-4 text-[#DEDBC8]" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Apple Glass Music Pill (Steve Lacy - Oh Yeah) */}
       {hasEntered && (

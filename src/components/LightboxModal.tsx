@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles } from 'lucide-react';
+import { X, Sparkles, Download, Check } from 'lucide-react';
 
 interface LightboxModalProps {
   isOpen: boolean;
@@ -19,14 +19,52 @@ export function LightboxModal({
 }: LightboxModalProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   // Reset loading status whenever modal opens or imageSrc changes
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
       setHasError(false);
+      setIsDownloading(false);
+      setDownloadSuccess(false);
     }
   }, [isOpen, imageSrc]);
+
+  const handleDownload = async () => {
+    if (!imageSrc || isDownloading) return;
+    try {
+      setIsDownloading(true);
+      const response = await fetch(imageSrc);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const extension = imageSrc.split('.').pop()?.split('?')[0] || 'jpg';
+      const safeCaption = caption
+        ? caption.toLowerCase().replace(/[^a-z0-9]/g, '_')
+        : 'satsetwell_archive';
+      link.download = `${safeCaption}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 2200);
+    } catch {
+      // Fallback for strict browser restrictions
+      const link = document.createElement('a');
+      link.href = imageSrc;
+      link.target = '_blank';
+      link.download = 'satsetwell_archive';
+      link.click();
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 2200);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -147,6 +185,27 @@ export function LightboxModal({
                   )}
                 </div>
               )}
+
+              {/* Unduh Foto Asli (4K Full Resolution) - No AI Emojis */}
+              <div className="mt-4 flex items-center justify-center">
+                <button
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/[0.08] hover:bg-white/[0.18] active:bg-white/[0.04] border border-white/20 hover:border-white/40 text-[#E1E0CC] text-xs font-mono tracking-wider uppercase backdrop-blur-xl transition-all duration-200 shadow-lg cursor-pointer active:scale-95 disabled:opacity-50 select-none"
+                >
+                  {downloadSuccess ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-[#DEDBC8]" />
+                      <span>Tersimpan</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3.5 h-3.5 text-[#DEDBC8]" />
+                      <span>{isDownloading ? 'Mengunduh...' : 'Unduh Foto Asli'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>

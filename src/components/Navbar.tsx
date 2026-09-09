@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Share2 } from 'lucide-react';
 
-export function Navbar() {
+interface NavbarProps {
+  onShare?: () => void;
+}
+
+export function Navbar({ onShare }: NavbarProps) {
   const [activeSection, setActiveSection] = useState<string>('hero');
 
   const navItems = [
@@ -75,6 +80,17 @@ export function Navbar() {
             </a>
           );
         })}
+
+        {onShare && (
+          <button
+            onClick={onShare}
+            aria-label="Bagikan Tautan Website"
+            className="relative flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-medium tracking-wide text-[#E1E0CC]/80 hover:text-white transition-all duration-200 select-none cursor-pointer rounded-full bg-white/[0.06] hover:bg-white/15 border border-white/15 active:scale-95 ml-1 sm:ml-2 shadow-sm"
+          >
+            <Share2 className="w-3.5 h-3.5 text-[#DEDBC8]" />
+            <span className="hidden sm:inline">Bagikan</span>
+          </button>
+        )}
       </nav>
     </header>
   );

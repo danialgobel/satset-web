@@ -462,11 +462,18 @@ export default function App() {
             {/* Card 1: Video Dokumentasi Asli Satsetwell (Floating Loop) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={isFeaturesInView ? { opacity: 1, y: [0, -8, 0] } : { opacity: 0, y: 30 }}
+              animate={
+                isFeaturesInView
+                  ? { opacity: 1, y: [-11, 11, -11], rotate: [-1.4, 1.4, -1.4] }
+                  : { opacity: 0, y: 30 }
+              }
               transition={{
                 opacity: { duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] },
                 y: isFeaturesInView
-                  ? { duration: 4.8, repeat: Infinity, ease: 'easeInOut' }
+                  ? { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }
+                  : { duration: 0.6 },
+                rotate: isFeaturesInView
+                  ? { duration: 2.9, repeat: Infinity, ease: 'easeInOut' }
                   : { duration: 0.6 }
               }}
               className="relative min-h-[520px] rounded-3xl overflow-hidden group cursor-pointer border border-white/10 hover:border-[#DEDBC8]/50 transition-colors duration-300 shadow-2xl flex flex-col justify-between p-6 sm:p-7 transform-gpu will-change-transform"
@@ -517,15 +524,31 @@ export default function App() {
               <motion.div
                 key={squad.id}
                 initial={{ opacity: 0, y: 30 }}
-                animate={isFeaturesInView ? { opacity: 1, y: [0, -8, 0] } : { opacity: 0, y: 30 }}
+                animate={
+                  isFeaturesInView
+                    ? {
+                        opacity: 1,
+                        y: idx % 2 === 0 ? [-12, 12, -12] : [12, -12, 12],
+                        rotate: idx % 2 === 0 ? [-1.6, 1.6, -1.6] : [1.6, -1.6, 1.6]
+                      }
+                    : { opacity: 0, y: 30 }
+                }
                 transition={{
                   opacity: { duration: 0.6, delay: 0.15 * (idx + 1), ease: [0.22, 1, 0.36, 1] },
                   y: isFeaturesInView
                     ? {
-                        duration: 4.2 + (idx % 3) * 0.6,
+                        duration: 2.4 + (idx % 3) * 0.3,
                         repeat: Infinity,
                         ease: 'easeInOut',
-                        delay: (idx + 1) * 0.35
+                        delay: idx * 0.2
+                      }
+                    : { duration: 0.6 },
+                  rotate: isFeaturesInView
+                    ? {
+                        duration: 2.7 + (idx % 3) * 0.3,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: idx * 0.2
                       }
                     : { duration: 0.6 }
                 }}
@@ -677,12 +700,15 @@ export default function App() {
             {filteredPhotos.map((photo: ArchivePhoto, i: number) => (
               <motion.div
                 key={photo.id}
-                animate={{ y: [0, -7, 0] }}
+                animate={{
+                  y: i % 2 === 0 ? [-9, 9, -9] : [9, -9, 9],
+                  rotate: i % 2 === 0 ? [-1.3, 1.3, -1.3] : [1.3, -1.3, 1.3]
+                }}
                 transition={{
-                  duration: 3.8 + (i % 3) * 0.5,
+                  duration: 2.3 + (i % 3) * 0.3,
                   repeat: Infinity,
                   ease: 'easeInOut',
-                  delay: (i % 3) * 0.25
+                  delay: (i % 3) * 0.2
                 }}
                 onClick={() =>
                   setSelectedImage({
@@ -753,14 +779,15 @@ export default function App() {
                 href={m.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                animate={{ y: [0, -6, 0] }}
+                animate={{
+                  y: idx % 2 === 0 ? [-8, 8, -8] : [8, -8, 8],
+                  rotate: idx % 2 === 0 ? [-1.3, 1.3, -1.3] : [1.3, -1.3, 1.3]
+                }}
                 transition={{
-                  y: {
-                    duration: 3.8 + (idx % 4) * 0.4,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    delay: (idx % 4) * 0.2
-                  }
+                  duration: 2.2 + (idx % 4) * 0.25,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: (idx % 4) * 0.15
                 }}
                 whileHover={{ scale: 1.04, y: -4 }}
                 whileTap={{ scale: 0.96 }}

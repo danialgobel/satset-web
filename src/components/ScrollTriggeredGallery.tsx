@@ -144,12 +144,15 @@ export function ScrollTriggeredGallery({ onSelectImage }: ScrollTriggeredGallery
 
                   {/* Big Image Display with WebP & Visible Floating Loop */}
                   <motion.div
-                    animate={{ y: [0, -7, 0] }}
+                    animate={{
+                      y: i % 2 === 0 ? [-8, 8, -8] : [8, -8, 8],
+                      rotate: i % 2 === 0 ? [-1.3, 1.3, -1.3] : [1.3, -1.3, 1.3]
+                    }}
                     transition={{
-                      duration: 4.2 + (i % 3) * 0.4,
+                      duration: 2.4 + (i % 3) * 0.3,
                       repeat: Infinity,
                       ease: 'easeInOut',
-                      delay: (i % 3) * 0.3
+                      delay: (i % 3) * 0.2
                     }}
                     className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-black/50 border border-white/10 transform-gpu will-change-transform"
                   >

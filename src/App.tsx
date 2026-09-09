@@ -12,7 +12,6 @@ import { IntroSplash } from './components/IntroSplash';
 import { LoadingScreen } from './components/LoadingScreen';
 import { squadsData, allArchivePhotos } from './data/membersData';
 import type { ArchivePhoto } from './data/membersData';
-import { Analytics } from '@vercel/analytics/react';
 
 function InstagramIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -824,9 +823,6 @@ export default function App() {
         videoSrc={modalVideo.src}
         youtubeId={modalVideo.youtubeId}
       />
-
-      {/* Vercel Web Analytics */}
-      <Analytics />
     </div>
   );
 }

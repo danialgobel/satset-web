@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntroSplashProps {
@@ -5,6 +6,46 @@ interface IntroSplashProps {
 }
 
 export function IntroSplash({ onEnter }: IntroSplashProps) {
+  const fullText = 'Satsetwel*';
+  const [displayedText, setDisplayedText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
+    if (!isDeleting) {
+      if (displayedText.length < fullText.length) {
+        // Typing characters quickly (75ms)
+        timeout = setTimeout(() => {
+          setDisplayedText(fullText.slice(0, displayedText.length + 1));
+        }, 75);
+      } else {
+        // Pause briefly once fully typed (950ms) before deleting
+        timeout = setTimeout(() => {
+          setIsDeleting(true);
+        }, 950);
+      }
+    } else {
+      if (displayedText.length > 0) {
+        // Deleting characters even faster (38ms)
+        timeout = setTimeout(() => {
+          setDisplayedText(fullText.slice(0, displayedText.length - 1));
+        }, 38);
+      } else {
+        // Pause briefly before typing again (300ms)
+        timeout = setTimeout(() => {
+          setIsDeleting(false);
+        }, 300);
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, isDeleting]);
+
+  // Separate asterisk for warm accent styling
+  const hasAsterisk = displayedText.endsWith('*');
+  const mainPart = hasAsterisk ? displayedText.slice(0, -1) : displayedText;
+
   return (
     <motion.div
       initial={{ opacity: 1 }}
@@ -30,10 +71,19 @@ export function IntroSplash({ onEnter }: IntroSplashProps) {
         </span>
       </div>
 
-      {/* Center Hero Heading: Satsetwel* */}
+      {/* Center Hero Heading: Satsetwel* (Fast Typewriter Animation) */}
       <div className="relative z-10 text-center flex flex-col items-center my-auto">
-        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-medium tracking-[-0.06em] text-[#E1E0CC] leading-none mb-3">
-          Satsetwel<span className="text-[#DEDBC8] font-light">*</span>
+        <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-medium tracking-[-0.06em] text-[#E1E0CC] leading-none mb-3 min-h-[1.1em] flex items-center justify-center">
+          <span>{mainPart}</span>
+          {hasAsterisk && <span className="text-[#DEDBC8] font-light">*</span>}
+          {/* Sleek Blinking Cursor */}
+          <motion.span
+            animate={{ opacity: [1, 0, 1] }}
+            transition={{ repeat: Infinity, duration: 0.65, ease: 'linear' }}
+            className="inline-block text-[#DEDBC8] font-light ml-0.5"
+          >
+            |
+          </motion.span>
         </h1>
         <p className="text-xs sm:text-sm text-[#DEDBC8]/75 font-light tracking-wide max-w-sm mx-auto">
           Sebuah ruang tumbuh bersama dari masa kecil hingga saat ini.

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ArrowRight, Check, Play, Eye, Sparkles, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { ArrowRight, Check, Play, Eye, Sparkles, ExternalLink, Image as ImageIcon, VolumeX } from 'lucide-react';
 import { WordsPullUp } from './components/WordsPullUp';
 import { WordsPullUpMultiStyle } from './components/WordsPullUpMultiStyle';
 import { ScrollRevealParagraph } from './components/ScrollRevealParagraph';
@@ -40,12 +40,120 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'new' | 'classic'>('all');
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
+  // Background Music Controller (Steve Lacy - Oh Yeah)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
+
+  const TARGET_VOLUME = 0.35;
+
+  const fadeAudioTo = (targetVol: number, durationMs: number, onComplete?: () => void) => {
+    if (!audioRef.current) return;
+    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+
+    const startVol = audioRef.current.volume;
+    const steps = Math.max(10, Math.floor(durationMs / 40));
+    const stepDiff = (targetVol - startVol) / steps;
+    let currentStep = 0;
+
+    fadeIntervalRef.current = setInterval(() => {
+      if (!audioRef.current) {
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        return;
+      }
+      currentStep++;
+      const nextVol = Math.min(1, Math.max(0, startVol + stepDiff * currentStep));
+      audioRef.current.volume = nextVol;
+
+      if (currentStep >= steps) {
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        audioRef.current.volume = targetVol;
+        if (onComplete) onComplete();
+      }
+    }, 40);
+  };
+
   const handleEnter = () => {
     setHasEntered(true);
     if (heroVideoRef.current) {
       heroVideoRef.current.play().catch(() => {});
     }
+
+    // Play background music starting at second 10 with smooth fade-in
+    try {
+      if (!audioRef.current) {
+        const audio = new Audio('/assets/audio/steve_lacy_oh_yeah.mp3');
+        audio.loop = true;
+        audioRef.current = audio;
+      }
+      const audio = audioRef.current;
+      audio.currentTime = 10;
+      audio.volume = 0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsMusicPlaying(true);
+            fadeAudioTo(TARGET_VOLUME, 1500);
+          })
+          .catch(() => {
+            setIsMusicPlaying(false);
+          });
+      }
+    } catch {
+      // Browser audio policy
+    }
   };
+
+  // Sync background music with video modal (fade out on open, fade in on close)
+  useEffect(() => {
+    if (!hasEntered || !audioRef.current) return;
+
+    if (isVideoOpen) {
+      // Fade out background music while video modal is active
+      fadeAudioTo(0, 800, () => {
+        audioRef.current?.pause();
+        setIsMusicPlaying(false);
+      });
+    } else {
+      // Resume background music when video modal closes
+      if (!isMusicMuted) {
+        audioRef.current.play().then(() => {
+          setIsMusicPlaying(true);
+          fadeAudioTo(TARGET_VOLUME, 1000);
+        }).catch(() => {});
+      }
+    }
+  }, [isVideoOpen, hasEntered, isMusicMuted]);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isMusicPlaying) {
+      fadeAudioTo(0, 500, () => {
+        audioRef.current?.pause();
+        setIsMusicPlaying(false);
+        setIsMusicMuted(true);
+      });
+    } else {
+      setIsMusicMuted(false);
+      audioRef.current.play().then(() => {
+        setIsMusicPlaying(true);
+        fadeAudioTo(TARGET_VOLUME, 800);
+      }).catch(() => {});
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // Guarantee instant video autoplay on mobile Safari & Chrome
   useEffect(() => {
@@ -611,6 +719,48 @@ export default function App() {
           </a>
         </div>
       </footer>
+
+      {/* Floating Apple Glass Music Pill (Steve Lacy - Oh Yeah) */}
+      {hasEntered && (
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="fixed bottom-5 right-5 z-40"
+        >
+          <button
+            onClick={toggleMusic}
+            className="flex items-center gap-2.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-2xl border border-white/20 hover:border-white/40 text-[#E1E0CC] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_10px_30px_rgba(0,0,0,0.5)] transition-all cursor-pointer group active:scale-95"
+            title={isMusicPlaying ? 'Jeda Musik' : 'Putar Musik'}
+          >
+            {/* Animated Equalizer Bars when playing, or static muted icon */}
+            <div className="w-4 h-4 flex items-end justify-center gap-0.5">
+              {isMusicPlaying ? (
+                <>
+                  <span className="w-1 bg-[#DEDBC8] rounded-full animate-[equalizer_0.8s_ease-in-out_infinite]" style={{ height: '70%' }} />
+                  <span className="w-1 bg-[#DEDBC8] rounded-full animate-[equalizer_1.1s_ease-in-out_infinite_0.2s]" style={{ height: '100%' }} />
+                  <span className="w-1 bg-[#DEDBC8] rounded-full animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" style={{ height: '50%' }} />
+                </>
+              ) : (
+                <VolumeX className="w-4 h-4 text-white/50" />
+              )}
+            </div>
+
+            <div className="flex flex-col items-start text-left">
+              <span className="text-[10px] sm:text-[11px] font-medium tracking-wide text-white/90 leading-tight">
+                Steve Lacy
+              </span>
+              <span className="text-[9px] text-[#DEDBC8]/70 font-mono leading-none">
+                oh yeah
+              </span>
+            </div>
+
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70 uppercase ml-1">
+              {isMusicPlaying ? '10s' : 'PAUSED'}
+            </span>
+          </button>
+        </motion.div>
+      )}
 
       {/* Modals */}
       <LightboxModal

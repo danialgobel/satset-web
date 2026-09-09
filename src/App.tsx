@@ -262,8 +262,8 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-end">
               {/* Left 8 Cols: Giant Heading */}
               <div className="lg:col-span-8 flex flex-col items-start">
-                {/* Badge: made by danialgobel (tanpa bulat hijau kelap-kelip) */}
-                <div className="flex items-center gap-2 mb-2 sm:mb-4 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-[#DEDBC8]/25 text-[#DEDBC8] text-[11px] sm:text-xs tracking-wider font-mono uppercase shadow-xl">
+                {/* Badge: made by danialgobel (dikecilkan dan minimalis) */}
+                <div className="inline-flex items-center mb-2 sm:mb-3 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-[#DEDBC8]/20 text-[#DEDBC8]/80 text-[9px] sm:text-[10px] tracking-widest font-mono uppercase shadow-lg">
                   <span>made by danialgobel</span>
                 </div>
 

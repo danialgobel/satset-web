@@ -142,15 +142,24 @@ export function ScrollTriggeredGallery({ onSelectImage }: ScrollTriggeredGallery
                     </span>
                   </div>
 
-                  {/* Big Image Display with WebP for ultra-fast rendering */}
-                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-black/50 border border-white/10">
+                  {/* Big Image Display with WebP & Visible Floating Loop */}
+                  <motion.div
+                    animate={{ y: [0, -7, 0] }}
+                    transition={{
+                      duration: 4.2 + (i % 3) * 0.4,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                      delay: (i % 3) * 0.3
+                    }}
+                    className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-black/50 border border-white/10 transform-gpu will-change-transform"
+                  >
                     <img
                       src={item.image}
                       alt={item.title}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                  </div>
+                  </motion.div>
 
                   {/* Card Title (Clean, no description, no emojis, no HD optimized text) */}
                   <div className="pt-2">

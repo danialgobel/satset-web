@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ArrowRight, Check, Play, Eye, Sparkles, Image as ImageIcon, VolumeX, Share2, Copy } from 'lucide-react';
-import { WordsPullUp } from './components/WordsPullUp';
+import { ArrowRight, Check, Play, Eye, Sparkles, Image as ImageIcon, VolumeX, Share2, Copy, Download } from 'lucide-react';
+import { HeroTypewriter } from './components/HeroTypewriter';
 import { WordsPullUpMultiStyle } from './components/WordsPullUpMultiStyle';
 import { ScrollRevealParagraph } from './components/ScrollRevealParagraph';
 import { Navbar } from './components/Navbar';
@@ -241,6 +241,46 @@ export default function App() {
     return photo.category === activeFilter;
   });
 
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  const handleDownloadAllPhotos = async () => {
+    if (isDownloadingAll) return;
+    setIsDownloadingAll(true);
+    setDownloadProgress(0);
+    triggerToast('Memulai pengunduhan gambar...');
+
+    const photosToDownload = filteredPhotos;
+    for (let i = 0; i < photosToDownload.length; i++) {
+      const photo = photosToDownload[i];
+      setDownloadProgress(i + 1);
+      try {
+        const response = await fetch(photo.fullRes || photo.src);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        const ext = (photo.fullRes || photo.src).split('.').pop()?.split('?')[0] || 'jpg';
+        const safeCaption = photo.caption.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        link.download = `satsetwell_${safeCaption}_${photo.id}.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      } catch {
+        const link = document.createElement('a');
+        link.href = photo.fullRes || photo.src;
+        link.download = `satsetwell_${photo.id}`;
+        link.target = '_blank';
+        link.click();
+      }
+      await new Promise((resolve) => setTimeout(resolve, 380));
+    }
+
+    setIsDownloadingAll(false);
+    triggerToast('Semua gambar berhasil diunduh!');
+  };
+
   return (
     <div className="min-h-screen bg-black text-[#E1E0CC] selection:bg-[#DEDBC8] selection:text-black">
       {/* Intro / Splash Screen with relaxed typewriter */}
@@ -299,10 +339,10 @@ export default function App() {
                   <span>made by danialgobel</span>
                 </div>
 
-                {/* Teks: Satsetwel* (ukuran proporsional, nyaman dilihat) */}
-                <div className="relative select-none text-[17vw] sm:text-[15.5vw] md:text-[13.5vw] lg:text-[12vw] xl:text-[10.5vw] 2xl:text-[11vw] font-medium leading-[0.85] tracking-[-0.07em] text-[#E1E0CC]">
-                  <WordsPullUp text="Satsetwel" showAsterisk={true} />
-                </div>
+                {/* Teks: Satsetwel* (Animasi Ketik Halus & Pelan Sesuai Permintaan User) */}
+                <h1 className="relative select-none text-[17vw] sm:text-[15.5vw] md:text-[13.5vw] lg:text-[12vw] xl:text-[10.5vw] 2xl:text-[11vw] font-medium leading-[0.85] tracking-[-0.07em] text-[#E1E0CC]">
+                  <HeroTypewriter hasEntered={hasEntered} />
+                </h1>
               </div>
 
               {/* Right 4 Cols: Description & Apple Glasses Styled CTA Buttons */}
@@ -419,12 +459,17 @@ export default function App() {
             ref={featuresRef}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6"
           >
-            {/* Card 1: Video Dokumentasi Asli Satsetwell */}
+            {/* Card 1: Video Dokumentasi Asli Satsetwell (Floating Loop) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={isFeaturesInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="relative min-h-[520px] rounded-3xl overflow-hidden group cursor-pointer border border-white/10 hover:border-[#DEDBC8]/50 transition-all shadow-2xl flex flex-col justify-between p-6 sm:p-7"
+              animate={isFeaturesInView ? { opacity: 1, y: [0, -8, 0] } : { opacity: 0, y: 30 }}
+              transition={{
+                opacity: { duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] },
+                y: isFeaturesInView
+                  ? { duration: 4.8, repeat: Infinity, ease: 'easeInOut' }
+                  : { duration: 0.6 }
+              }}
+              className="relative min-h-[520px] rounded-3xl overflow-hidden group cursor-pointer border border-white/10 hover:border-[#DEDBC8]/50 transition-colors duration-300 shadow-2xl flex flex-col justify-between p-6 sm:p-7 transform-gpu will-change-transform"
               onClick={() => {
                 setModalVideo({ src: '/assets/dokumentasi_baru/satsetwell_hero_hd.mp4' });
                 setIsVideoOpen(true);
@@ -467,14 +512,24 @@ export default function App() {
               </div>
             </motion.div>
 
-            {/* Cards 2, 3, 4: Squad Cards dengan FOTO BESAR 4K TEGAK & NAMA BESAR */}
+            {/* Cards 2, 3, 4: Squad Cards dengan FOTO BESAR 4K TEGAK (Floating Loop) */}
             {squadsData.map((squad, idx) => (
               <motion.div
                 key={squad.id}
                 initial={{ opacity: 0, y: 30 }}
-                animate={isFeaturesInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                transition={{ duration: 0.6, delay: 0.15 * (idx + 1), ease: [0.22, 1, 0.36, 1] }}
-                className="min-h-[520px] bg-[#212121] rounded-3xl p-5 sm:p-6 flex flex-col justify-between border border-white/10 hover:border-[#DEDBC8]/50 transition-all duration-300 shadow-2xl group"
+                animate={isFeaturesInView ? { opacity: 1, y: [0, -8, 0] } : { opacity: 0, y: 30 }}
+                transition={{
+                  opacity: { duration: 0.6, delay: 0.15 * (idx + 1), ease: [0.22, 1, 0.36, 1] },
+                  y: isFeaturesInView
+                    ? {
+                        duration: 4.2 + (idx % 3) * 0.6,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: (idx + 1) * 0.35
+                      }
+                    : { duration: 0.6 }
+                }}
+                className="min-h-[520px] bg-[#212121] rounded-3xl p-5 sm:p-6 flex flex-col justify-between border border-white/10 hover:border-[#DEDBC8]/50 transition-colors duration-300 shadow-2xl group transform-gpu will-change-transform"
               >
                 <div>
                   {/* Top Bar: Squad Title & Index */}
@@ -566,46 +621,69 @@ export default function App() {
             </p>
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-8">
+          {/* Filter Tabs & Action Unduh Semua Gambar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => setActiveFilter('all')}
+                className={`px-4 py-2 rounded-full text-xs font-mono font-medium transition-all ${
+                  activeFilter === 'all'
+                    ? 'bg-[#DEDBC8] text-black shadow-lg'
+                    : 'bg-[#212121] text-gray-300 hover:text-white border border-white/5'
+                }`}
+              >
+                Semua Foto ({allArchivePhotos.length})
+              </button>
+              <button
+                onClick={() => setActiveFilter('new')}
+                className={`px-4 py-2 rounded-full text-xs font-mono font-medium transition-all flex items-center gap-1.5 ${
+                  activeFilter === 'new'
+                    ? 'bg-[#DEDBC8] text-black shadow-lg'
+                    : 'bg-[#212121] text-gray-300 hover:text-white border border-white/5'
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                Dokumentasi Baru (9)
+              </button>
+              <button
+                onClick={() => setActiveFilter('classic')}
+                className={`px-4 py-2 rounded-full text-xs font-mono font-medium transition-all ${
+                  activeFilter === 'classic'
+                    ? 'bg-[#DEDBC8] text-black shadow-lg'
+                    : 'bg-[#212121] text-gray-300 hover:text-white border border-white/5'
+                }`}
+              >
+                Arsip Klasik (9)
+              </button>
+            </div>
+
+            {/* Tombol Unduh Semua Gambar (Sleek, Non-Intrusive, Tanpa Emot AI) */}
             <button
-              onClick={() => setActiveFilter('all')}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-medium transition-all ${
-                activeFilter === 'all'
-                  ? 'bg-[#DEDBC8] text-black shadow-lg'
-                  : 'bg-[#212121] text-gray-300 hover:text-white border border-white/5'
-              }`}
+              onClick={handleDownloadAllPhotos}
+              disabled={isDownloadingAll}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.18] active:bg-white/[0.04] border border-white/20 hover:border-white/40 text-[#E1E0CC] text-xs font-mono tracking-wider uppercase transition-all duration-300 shadow-md cursor-pointer active:scale-95 disabled:opacity-50 w-fit select-none"
             >
-              Semua Foto ({allArchivePhotos.length})
-            </button>
-            <button
-              onClick={() => setActiveFilter('new')}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-medium transition-all flex items-center gap-1.5 ${
-                activeFilter === 'new'
-                  ? 'bg-[#DEDBC8] text-black shadow-lg'
-                  : 'bg-[#212121] text-gray-300 hover:text-white border border-white/5'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Dokumentasi Baru (9)
-            </button>
-            <button
-              onClick={() => setActiveFilter('classic')}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-medium transition-all ${
-                activeFilter === 'classic'
-                  ? 'bg-[#DEDBC8] text-black shadow-lg'
-                  : 'bg-[#212121] text-gray-300 hover:text-white border border-white/5'
-              }`}
-            >
-              Arsip Klasik (9)
+              <Download className="w-3.5 h-3.5 text-[#DEDBC8]" />
+              <span>
+                {isDownloadingAll
+                  ? `Mengunduh (${downloadProgress}/${filteredPhotos.length})...`
+                  : 'Unduh Semua Gambar'}
+              </span>
             </button>
           </div>
 
-          {/* Photo Gallery Grid - Zero Lag Instant Filter */}
+          {/* Photo Gallery Grid - Floating Loop Animation */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-            {filteredPhotos.map((photo: ArchivePhoto) => (
-              <div
+            {filteredPhotos.map((photo: ArchivePhoto, i: number) => (
+              <motion.div
                 key={photo.id}
+                animate={{ y: [0, -7, 0] }}
+                transition={{
+                  duration: 3.8 + (i % 3) * 0.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: (i % 3) * 0.25
+                }}
                 onClick={() =>
                   setSelectedImage({
                     src: photo.fullRes,
@@ -613,7 +691,7 @@ export default function App() {
                     subtext: `${photo.squad} • Format Resolusi Asli HD`
                   })
                 }
-                className="relative aspect-square rounded-2xl overflow-hidden bg-[#101010] border border-white/10 hover:border-[#DEDBC8]/50 group cursor-pointer shadow-xl transition-transform duration-200 hover:-translate-y-1 active:scale-95 will-change-transform"
+                className="relative aspect-square rounded-2xl overflow-hidden bg-[#101010] border border-white/10 hover:border-[#DEDBC8]/50 group cursor-pointer shadow-xl transition-all duration-300 hover:shadow-2xl active:scale-95 transform-gpu will-change-transform"
               >
                 <img
                   src={photo.src}
@@ -628,7 +706,7 @@ export default function App() {
                   </span>
                   <h4 className="text-sm sm:text-base font-bold text-white">{photo.caption}</h4>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -669,16 +747,24 @@ export default function App() {
               { name: 'Iqbal', handle: '@iqbaaaaaaalle', url: 'https://www.instagram.com/iqbaaaaaaalle?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
               { name: 'Adib', handle: '@adiblzwr_ilhmy', url: 'https://www.instagram.com/adiblzwr_ilhmy?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
               { name: 'Sakil', handle: '@syakilazzrfny', url: 'https://www.instagram.com/syakilazzrfny?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==' },
-            ].map((m) => (
+            ].map((m, idx) => (
               <motion.a
                 key={m.handle}
                 href={m.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                animate={{ y: [0, -6, 0] }}
+                transition={{
+                  y: {
+                    duration: 3.8 + (idx % 4) * 0.4,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: (idx % 4) * 0.2
+                  }
+                }}
                 whileHover={{ scale: 1.04, y: -4 }}
                 whileTap={{ scale: 0.96 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                className="bg-[#1c1c1c] hover:bg-[#252525] p-4 rounded-2xl border border-white/10 hover:border-[#DEDBC8] hover:shadow-[0_0_25px_rgba(222,219,200,0.15)] transition-all flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+                className="bg-[#1c1c1c] hover:bg-[#252525] p-4 rounded-2xl border border-white/10 hover:border-[#DEDBC8] hover:shadow-[0_0_25px_rgba(222,219,200,0.15)] transition-colors flex flex-col justify-between group cursor-pointer relative overflow-hidden transform-gpu will-change-transform"
               >
                 {/* Active Indicator */}
                 <div className="flex items-center justify-between mb-3">
